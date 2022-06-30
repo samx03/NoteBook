@@ -1,14 +1,20 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 import noteContext from '../context/notes/noteContext';
 import Addnote from './Addnote';
 import Noteitem from './Noteitem';
 
-function Notes() {
-
+function Notes(props) {
     const context = useContext(noteContext);
+    let navigate = useNavigate();
     const { notes, getNotes, editNote } = context;
     useEffect(() => {
-        getNotes();
+        if (localStorage.getItem('token')) {
+            getNotes();
+        }
+        else{
+            navigate("/login");
+        }
         // eslint-disable-next-line
     }, []);
 
@@ -24,6 +30,7 @@ function Notes() {
     const handleClick = (e) => {
         editNote(note.id, note.etitle, note.edescription, note.etag);
         refClose.current.click();
+        props.showAlert("Updated Successfully!", "success");
     }
 
     const onChange = (e) => {
@@ -32,7 +39,7 @@ function Notes() {
 
     return (
         <>
-            <Addnote />
+            <Addnote showAlert={props.showAlert} />
 
             <button ref={ref} type="button" className="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#exampleModal">
                 Launch demo modal
@@ -60,7 +67,7 @@ function Notes() {
                         </div>
                         <div className="modal-footer">
                             <button ref={refClose} type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button disabled={note.etitle.length< 5 || note.edescription.length<5} onClick={handleClick} type="button" className="btn btn-primary">Edit Note</button>
+                            <button disabled={note.etitle.length < 5 || note.edescription.length < 5} onClick={handleClick} type="button" className="btn btn-primary">Edit Note</button>
                         </div>
                     </div>
                 </div>
@@ -71,7 +78,7 @@ function Notes() {
                     {notes.length === 0 && 'No notes to display'}
                 </div>
                 {notes.map((note) => {
-                    return <Noteitem key={note._id} updateNote={updateNote} note={note} />;
+                    return <Noteitem key={note._id} updateNote={updateNote} showAlert={props.showAlert} note={note} />;
                 })}
             </div>
         </>
