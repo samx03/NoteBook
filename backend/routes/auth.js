@@ -14,9 +14,10 @@ router.post('/createuser', [
     body('email', 'Enter a valid email').isEmail(),
     body('password', 'Password should be more than 4 characters').isLength({ min: 5 })
 ], async (req, res) => {
+    let success = false;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ success, errors: errors.array() });
     }
 
     try {
@@ -24,7 +25,7 @@ router.post('/createuser', [
 
         let user = await User.findOne({ email: req.body.email });
         if (user) {
-            return res.status(400).json({ error: "Sorry a user with this email already exists" });
+            return res.status(400).json({ success,error: "Sorry a user with this email already exists" });
         }
 
         //Generating salt(dummy text which is appended to your password) using bcrypt js 
@@ -46,7 +47,8 @@ router.post('/createuser', [
         // console.log(authToken);
 
         // res.json(user);
-        res.json({ authToken });
+        success = true;
+        res.json({ success,authToken });
     } catch (error) {
         console.error(error.message);
         res.status(500).send("Internal Server Error");
